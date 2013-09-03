@@ -152,6 +152,8 @@ idGameLocal::idGameLocal
 ============
 */
 idGameLocal::idGameLocal() {
+	dv2549ProtocolTraced = false;
+	dv2549AgentActivated = false;
 	Clear();
 }
 

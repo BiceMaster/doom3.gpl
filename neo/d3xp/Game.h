@@ -72,6 +72,11 @@ typedef enum {
 #endif
 
 class idGame {
+	// PROMODS by bicen
+//public:
+//	bool dv2549ProtocolTraced;
+//	bool dv2549AgentActivated;
+
 public:
 	virtual						~idGame() {}
 

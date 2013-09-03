@@ -188,6 +188,9 @@ idGameLocal::idGameLocal
 */
 idGameLocal::idGameLocal() {
 	Clear();
+	// PROMODS by bicen
+	//dv2549ProtocolTraced = false;
+	//dv2549AgentActivated = false;
 }
 
 /*
@@ -4983,4 +4986,26 @@ idGameLocal::GetMapLoadingGUI
 ===============
 */
 void idGameLocal::GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] ) { }
+
+void idGameLocal::DV2549ProtocolTrace( const char* text )
+{
+	if(strcmp( text, "ProtocolTrace" )) {
+		dv2549ProtocolTraced = true;
+		common->Printf("DV2549_PROTOCOL: traced");
+	} else if(strcmp( text, "ProtocolHide" )) {
+		dv2549ProtocolTraced = false;
+		common->Printf("DV2549_PROTOCOL: hidden");
+	}
+}
+
+void idGameLocal::DV2549AgentActivate( const char* text )
+{
+	if(strcmp( text, "AgentActivate" )) {
+		dv2549AgentActivated = true;
+		common->Printf("DV2549_AGENT: activated");
+	} else if(strcmp( text, "AgentDeactivate" )) {
+		dv2549AgentActivated = false;
+		common->Printf("DV2549_AGENT: deactivated");
+	}
+}
 

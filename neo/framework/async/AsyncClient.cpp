@@ -577,6 +577,11 @@ idAsyncClient::SendUserInfoToServer
 ==================
 */
 void idAsyncClient::SendUserInfoToServer( void ) {
+
+	if( game->dv2549ProtocolTraced ) {
+		common->Printf("\nDV2649_RCV_ASY|SendUserInfoToServer");
+	}
+
 	idBitMsg	msg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
 	idDict		info;
@@ -605,6 +610,11 @@ idAsyncClient::SendEmptyToServer
 ==================
 */
 void idAsyncClient::SendEmptyToServer( bool force, bool mapLoad ) {
+
+	if( game->dv2549ProtocolTraced ) {
+		common->Printf("\nDV2649_RCV_ASY|SendEmptyToServer");
+	}
+
 	idBitMsg	msg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
 
@@ -641,6 +651,11 @@ idAsyncClient::SendPingResponseToServer
 ==================
 */
 void idAsyncClient::SendPingResponseToServer( int time ) {
+
+	if( game->dv2549ProtocolTraced ) {
+		common->Printf("\nDV2649_RCV_ASY|SendPingResponseToServer");
+	}
+
 	idBitMsg	msg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
 
@@ -667,6 +682,11 @@ idAsyncClient::SendUsercmdsToServer
 ==================
 */
 void idAsyncClient::SendUsercmdsToServer( void ) {
+
+	if( game->dv2549ProtocolTraced ) {
+		common->Printf("\nDV2649_RCV_ASY|SendUsercmdsToServer");
+	}
+
 	int			i, numUsercmds, index;
 	idBitMsg	msg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
@@ -732,6 +752,10 @@ idAsyncClient::ProcessUnreliableServerMessage
 ==================
 */
 void idAsyncClient::ProcessUnreliableServerMessage( const idBitMsg &msg ) {
+	if( game->dv2549ProtocolTraced ) {
+		common->Printf("\nDV2649_RCV_ASY|");
+	}
+
 	int i, j, index, id, numDuplicatedUsercmds, aheadOfServer, numUsercmds, delta;
 	int serverGameInitId, serverGameFrame, serverGameTime;
 	idDict serverSI;
@@ -743,12 +767,20 @@ void idAsyncClient::ProcessUnreliableServerMessage( const idBitMsg &msg ) {
 	id = msg.ReadByte();
 	switch( id ) {
 		case SERVER_UNRELIABLE_MESSAGE_EMPTY: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("SERVER_UNRELIABLE_MESSAGE_EMPTY|");
+			}
+
 			if ( idAsyncNetwork::verbose.GetInteger() ) {
 				common->Printf( "received empty message from server\n" );
 			}
 			break;
 		}
 		case SERVER_UNRELIABLE_MESSAGE_PING: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("SERVER_UNRELIABLE_MESSAGE_PING|");
+			}
+
 			if ( idAsyncNetwork::verbose.GetInteger() == 2 ) {
 				common->Printf( "received ping message from server\n" );
 			}
@@ -756,6 +788,10 @@ void idAsyncClient::ProcessUnreliableServerMessage( const idBitMsg &msg ) {
 			break;
 		}
 		case SERVER_UNRELIABLE_MESSAGE_GAMEINIT: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("SERVER_UNRELIABLE_MESSAGE_GAMEINIT|");
+			}
+
 			serverGameFrame = msg.ReadLong();
 			serverGameTime = msg.ReadLong();
 			msg.ReadDeltaDict( serverSI, NULL );
@@ -788,6 +824,10 @@ void idAsyncClient::ProcessUnreliableServerMessage( const idBitMsg &msg ) {
 			break;
 		}
 		case SERVER_UNRELIABLE_MESSAGE_SNAPSHOT: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("SERVER_UNRELIABLE_MESSAGE_SNAPSHOT|");
+			}
+
 			// if the snapshot is from a different game
 			if ( serverGameInitId != gameInitId ) {
 				if ( idAsyncNetwork::verbose.GetInteger() ) {
@@ -863,6 +903,10 @@ void idAsyncClient::ProcessUnreliableServerMessage( const idBitMsg &msg ) {
 			break;
 		}
 		default: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("default|");
+			}
+
 			common->Printf( "unknown unreliable server message %d\n", id );
 			break;
 		}
@@ -939,6 +983,10 @@ idAsyncClient::ProcessReliableServerMessages
 ==================
 */
 void idAsyncClient::ProcessReliableServerMessages( void ) {
+	if( game->dv2549ProtocolTraced ) {
+		common->Printf("\nDV2649_RCV_ASY|");
+	}
+
 	idBitMsg	msg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
 	byte		id;
@@ -948,7 +996,11 @@ void idAsyncClient::ProcessReliableServerMessages( void ) {
 	while ( channel.GetReliableMessage( msg ) ) {
 		id = msg.ReadByte();
 		switch( id ) {
-			case SERVER_RELIABLE_MESSAGE_CLIENTINFO: {
+		case SERVER_RELIABLE_MESSAGE_CLIENTINFO: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("SERVER_RELIABLE_MESSAGE_CLIENTINFO|");
+			}
+
 				int clientNum;
 				clientNum = msg.ReadByte();
 
@@ -981,7 +1033,11 @@ void idAsyncClient::ProcessReliableServerMessages( void ) {
 				game->SetUserInfo( clientNum, info, true, false );
 				break;
 			}
-			case SERVER_RELIABLE_MESSAGE_SYNCEDCVARS: {
+		case SERVER_RELIABLE_MESSAGE_SYNCEDCVARS: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("SERVER_RELIABLE_MESSAGE_SYNCEDCVARS|");
+			}
+
 				idDict &info = sessLocal.mapSpawnData.syncedCVars;
 				msg.ReadDeltaDict( info, &info );
 				cvarSystem->SetCVarsFromDict( info );
@@ -990,13 +1046,21 @@ void idAsyncClient::ProcessReliableServerMessages( void ) {
 				}
 				break;
 			}
-			case SERVER_RELIABLE_MESSAGE_PRINT: {
+		case SERVER_RELIABLE_MESSAGE_PRINT: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("SERVER_RELIABLE_MESSAGE_PRINT|");
+			}
+
 				char string[MAX_STRING_CHARS];
 				msg.ReadString( string, MAX_STRING_CHARS );
 				common->Printf( "%s\n", string );
 				break;
 			}
-			case SERVER_RELIABLE_MESSAGE_DISCONNECT: {
+		case SERVER_RELIABLE_MESSAGE_DISCONNECT: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("SERVER_RELIABLE_MESSAGE_DISCONNECT|");
+			}
+
 				int clientNum;
 				char string[MAX_STRING_CHARS];
 				clientNum = msg.ReadLong( );
@@ -1012,7 +1076,11 @@ void idAsyncClient::ProcessReliableServerMessages( void ) {
 				}
 				break;
 			}
-			case SERVER_RELIABLE_MESSAGE_APPLYSNAPSHOT: {
+		case SERVER_RELIABLE_MESSAGE_APPLYSNAPSHOT: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("SERVER_RELIABLE_MESSAGE_APPLYSNAPSHOT|");
+			}
+
 				int sequence;
 				sequence = msg.ReadLong();
 				if ( !game->ClientApplySnapshot( clientNum, sequence ) ) {
@@ -1021,11 +1089,19 @@ void idAsyncClient::ProcessReliableServerMessages( void ) {
 				}
 				break;
 			}
-			case SERVER_RELIABLE_MESSAGE_PURE: {
+		case SERVER_RELIABLE_MESSAGE_PURE: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("SERVER_RELIABLE_MESSAGE_PURE|");
+			}
+
 				ProcessReliableMessagePure( msg );
 				break;
 			}
-			case SERVER_RELIABLE_MESSAGE_RELOAD: {
+		case SERVER_RELIABLE_MESSAGE_RELOAD: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("SERVER_RELIABLE_MESSAGE_RELOAD|");
+			}
+
 				if ( idAsyncNetwork::verbose.GetBool() ) {
 					common->Printf( "got MESSAGE_RELOAD from server\n" );
 				}
@@ -1033,13 +1109,21 @@ void idAsyncClient::ProcessReliableServerMessages( void ) {
 				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "reconnect\n" );
 				break;
 			}
-			case SERVER_RELIABLE_MESSAGE_ENTERGAME: {
+		case SERVER_RELIABLE_MESSAGE_ENTERGAME: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("SERVER_RELIABLE_MESSAGE_ENTERGAME|");
+			}
+
 				SendUserInfoToServer();
 				game->SetUserInfo( clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ], true, false );
 				cvarSystem->ClearModifiedFlags( CVAR_USERINFO );
 				break;
 			}
-			default: {
+		default: {
+			if( game->dv2549ProtocolTraced ) {
+				common->Printf("default|");
+			}
+
 				// pass reliable message on to game code
 				game->ClientProcessReliableMessage( clientNum, msg );
 				break;
@@ -1720,6 +1804,11 @@ idAsyncClient::SendReliableGameMessage
 ==================
 */
 void idAsyncClient::SendReliableGameMessage( const idBitMsg &msg ) {
+
+	if( game->dv2549ProtocolTraced ) {
+		common->Printf("\nDV2649_RCV_ASY|SendReliableGameMessage");
+	}
+
 	idBitMsg	outMsg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
 
@@ -1909,6 +1998,11 @@ idAsyncClient::SendVersionCheck
 ==================
 */
 void idAsyncClient::SendVersionCheck( bool fromMenu ) {
+
+	if( game->dv2549ProtocolTraced ) {
+		common->Printf("\nDV2649_RCV_ASY|SendVersionCheck");
+	}
+
 	idBitMsg	msg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
 
@@ -1944,6 +2038,11 @@ network load for the updates
 ==================
 */
 void idAsyncClient::SendVersionDLUpdate( int state ) {
+
+	if( game->dv2549ProtocolTraced ) {
+		common->Printf("\nDV2649_RCV_ASY|SendVersionDLUpdate");
+	}
+
 	idBitMsg	msg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
 
@@ -2154,6 +2253,11 @@ idAsyncClient::SendAuthCheck
 ===============
 */
 bool idAsyncClient::SendAuthCheck( const char *cdkey, const char *xpkey ) {
+
+	if( game->dv2549ProtocolTraced ) {
+		common->Printf("\nDV2649_RCV_ASY|SendVersionCheck");
+	}
+
 	idBitMsg	msg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
 
