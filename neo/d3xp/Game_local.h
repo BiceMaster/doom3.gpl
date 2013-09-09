@@ -266,11 +266,6 @@ enum slowmoState_t {
 //============================================================================
 
 class idGameLocal : public idGame {
-	
-	// PROMODS by bicen
-public:
-	void DV2549ProtocolTrace( const char* text );
-	void DV2549AgentActivate( const char* text );
 
 public:
 	idDict					serverInfo;				// all the tunable parameters, like numclients, etc

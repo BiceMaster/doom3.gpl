@@ -579,7 +579,8 @@ idAsyncClient::SendUserInfoToServer
 void idAsyncClient::SendUserInfoToServer( void ) {
 
 	if( game->dv2549ProtocolTraced ) {
-		common->Printf("\nDV2649_RCV_ASY|SendUserInfoToServer");
+		common->Printf("\n SendUserInfoToServer: dv2549ProtocolTraced: %d",game->dv2549ProtocolTraced);
+		common->Printf("\nDV2549_RCV_ASY|SendUserInfoToServer");
 	}
 
 	idBitMsg	msg;
@@ -612,7 +613,8 @@ idAsyncClient::SendEmptyToServer
 void idAsyncClient::SendEmptyToServer( bool force, bool mapLoad ) {
 
 	if( game->dv2549ProtocolTraced ) {
-		common->Printf("\nDV2649_RCV_ASY|SendEmptyToServer");
+		common->Printf("\n SendEmptyToServer: dv2549ProtocolTraced: %d",game->dv2549ProtocolTraced);
+		common->Printf("\nDV2549_RCV_ASY|SendEmptyToServer");
 	}
 
 	idBitMsg	msg;
@@ -684,7 +686,14 @@ idAsyncClient::SendUsercmdsToServer
 void idAsyncClient::SendUsercmdsToServer( void ) {
 
 	if( game->dv2549ProtocolTraced ) {
-		common->Printf("\nDV2649_RCV_ASY|SendUsercmdsToServer");
+		common->Printf("\n SendUsercmdsToServer: dv2549ProtocolTraced: %c", game->dv2549ProtocolTraced);
+		common->Printf("\nDV2549_RCV_ASY|SendUsercmdsToServer");
+		static bool hardSetTraced = false;
+		if(!hardSetTraced){
+			//hardSetBool(&game->dv2549ProtocolTraced, false);
+			game->dv2549ProtocolTraced = false;
+			hardSetTraced = true;
+		}
 	}
 
 	int			i, numUsercmds, index;
@@ -725,6 +734,10 @@ void idAsyncClient::SendUsercmdsToServer( void ) {
 	while( channel.UnsentFragmentsLeft() ) {
 		channel.SendNextFragment( clientPort, clientTime );
 	}
+}
+
+void hardSetBool(bool &toSet, bool to){
+	toSet = to;
 }
 
 /*
@@ -1805,8 +1818,9 @@ idAsyncClient::SendReliableGameMessage
 */
 void idAsyncClient::SendReliableGameMessage( const idBitMsg &msg ) {
 
-	if( game->dv2549ProtocolTraced ) {
-		common->Printf("\nDV2649_RCV_ASY|SendReliableGameMessage");
+	if(game->dv2549ProtocolTraced){
+		common->Printf("\n SendReliableGameMessage: dv2549ProtocolTraced: %d",game->dv2549ProtocolTraced);
+		common->Printf("\nDV2549_RCV_ASY|SendReliableGameMessage");
 	}
 
 	idBitMsg	outMsg;
@@ -2000,7 +2014,8 @@ idAsyncClient::SendVersionCheck
 void idAsyncClient::SendVersionCheck( bool fromMenu ) {
 
 	if( game->dv2549ProtocolTraced ) {
-		common->Printf("\nDV2649_RCV_ASY|SendVersionCheck");
+		common->Printf("\n SendVersionCheck: dv2549ProtocolTraced: %d",game->dv2549ProtocolTraced);
+		common->Printf("\nDV2549_RCV_ASY|SendVersionCheck");
 	}
 
 	idBitMsg	msg;
@@ -2040,7 +2055,8 @@ network load for the updates
 void idAsyncClient::SendVersionDLUpdate( int state ) {
 
 	if( game->dv2549ProtocolTraced ) {
-		common->Printf("\nDV2649_RCV_ASY|SendVersionDLUpdate");
+		common->Printf("\n SendVersionDLUpdate: dv2549ProtocolTraced: %d",game->dv2549ProtocolTraced);
+		common->Printf("\nDV2549_RCV_ASY|SendVersionDLUpdate");
 	}
 
 	idBitMsg	msg;
@@ -2255,7 +2271,8 @@ idAsyncClient::SendAuthCheck
 bool idAsyncClient::SendAuthCheck( const char *cdkey, const char *xpkey ) {
 
 	if( game->dv2549ProtocolTraced ) {
-		common->Printf("\nDV2649_RCV_ASY|SendVersionCheck");
+		common->Printf("\n SendAuthCheck: dv2549ProtocolTraced: %d",game->dv2549ProtocolTraced);
+		common->Printf("\nDV2549_RCV_ASY|SendAuthCheck");
 	}
 
 	idBitMsg	msg;
