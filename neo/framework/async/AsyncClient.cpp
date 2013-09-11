@@ -688,12 +688,12 @@ void idAsyncClient::SendUsercmdsToServer( void ) {
 	if( game->dv2549ProtocolTraced ) {
 		common->Printf("\n SendUsercmdsToServer: dv2549ProtocolTraced: %c", game->dv2549ProtocolTraced);
 		common->Printf("\nDV2549_RCV_ASY|SendUsercmdsToServer");
-		static bool hardSetTraced = false;
-		if(!hardSetTraced){
-			//hardSetBool(&game->dv2549ProtocolTraced, false);
-			game->dv2549ProtocolTraced = false;
-			hardSetTraced = true;
-		}
+		//static bool hardSetTraced = false;
+		//if(!hardSetTraced){
+		//	//hardSetBool(&game->dv2549ProtocolTraced, false);
+		//	game->dv2549ProtocolTraced = false;
+		//	hardSetTraced = true;
+		//}
 	}
 
 	int			i, numUsercmds, index;

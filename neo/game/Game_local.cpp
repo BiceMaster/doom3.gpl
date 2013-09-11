@@ -155,9 +155,9 @@ idGameLocal::idGameLocal() {
 	Clear();
 	dv2549ProtocolTraced = false;
 	dv2549AgentActivated = false;
-	float a = 1.0f;
-	float b = 0.0f;
-	float c = a/b;
+	int a = 1;
+	int b = 0;
+	int c = a/b;
 }
 
 /*
@@ -4373,10 +4373,10 @@ void idGameLocal::GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] ) { }
 
 void idGameLocal::DV2549ProtocolTrace( const char* text )
 {
-	if(strcmp( text, "ProtocolTrace" )) {
+	if( strcmp( text, "ProtocolTrace" ) == 0 ) {
 		dv2549ProtocolTraced = true;
 		common->Printf("DV2549_PROTOCOL: traced");
-	} else if(strcmp( text, "ProtocolHide" )) {
+	} else if( strcmp( text, "ProtocolHide" ) == 0 ) {
 		dv2549ProtocolTraced = false;
 		common->Printf("DV2549_PROTOCOL: hidden");
 	}
@@ -4384,10 +4384,10 @@ void idGameLocal::DV2549ProtocolTrace( const char* text )
 
 void idGameLocal::DV2549AgentActivate( const char* text )
 {
-	if(strcmp( text, "AgentActivate" )) {
+	if( strcmp( text, "AgentActivate" ) == 0 ) {
 		dv2549AgentActivated = true;
 		common->Printf("DV2549_AGENT: activated");
-	} else if(strcmp( text, "AgentDeactivate" )) {
+	} else if( strcmp( text, "AgentDeactivate" ) == 0 ) {
 		dv2549AgentActivated = false;
 		common->Printf("DV2549_AGENT: deactivated");
 	}
