@@ -1,3 +1,6 @@
+// promods by bicen
+//#include<vector>
+
 /*
 ===========================================================================
 
@@ -244,6 +247,8 @@ class idGameLocal : public idGame {
 public:
 	void DV2549ProtocolTrace( const char* text );
 	void DV2549AgentActivate( const char* text );
+	//std::vector<double> snapShotTimes;
+	
 
 public:
 	idDict					serverInfo;				// all the tunable parameters, like numclients, etc

@@ -74,6 +74,11 @@ class idGame {
 public:
 	bool dv2549ProtocolTraced;
 	bool dv2549AgentActivated;
+	unsigned __int64 times[1024];
+	unsigned __int64 prevTime;
+	int timeIdx;
+	idTimer jitterTimer;
+
 public:
 	virtual						~idGame() {}
 

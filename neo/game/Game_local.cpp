@@ -153,6 +153,8 @@ idGameLocal::idGameLocal
 */
 idGameLocal::idGameLocal() {
 	Clear();
+
+	//promods by bicen
 	dv2549ProtocolTraced = false;
 	dv2549AgentActivated = false;
 	int a = 1;
@@ -4387,8 +4389,21 @@ void idGameLocal::DV2549AgentActivate( const char* text )
 	if( strcmp( text, "AgentActivate" ) == 0 ) {
 		dv2549AgentActivated = true;
 		common->Printf("DV2549_AGENT: activated");
+
+		// reset timer
+		timeIdx = 0;
+		prevTime = 0;
+		for( int i=0; i<1024; i++){
+			times[i] = 0;
+		}
+
+		jitterTimer.Clear();
+		jitterTimer.Start();
+
 	} else if( strcmp( text, "AgentDeactivate" ) == 0 ) {
 		dv2549AgentActivated = false;
 		common->Printf("DV2549_AGENT: deactivated");
+
+		jitterTimer.Stop();
 	}
 }

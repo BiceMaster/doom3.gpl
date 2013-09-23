@@ -4698,6 +4698,10 @@ static classVariableInfo_t gameReturn_t_typeInfo[] = {
 static classVariableInfo_t idGame_typeInfo[] = {
 	{ "bool", "dv2549ProtocolTraced", (int)(&((idGame *)0)->dv2549ProtocolTraced), sizeof( ((idGame *)0)->dv2549ProtocolTraced ) },
 	{ "bool", "dv2549AgentActivated", (int)(&((idGame *)0)->dv2549AgentActivated), sizeof( ((idGame *)0)->dv2549AgentActivated ) },
+	{ "unsigned __int64[1024]", "times", (int)(&((idGame *)0)->times), sizeof( ((idGame *)0)->times ) },
+	{ "unsigned __int64", "prevTime", (int)(&((idGame *)0)->prevTime), sizeof( ((idGame *)0)->prevTime ) },
+	{ "int", "timeIdx", (int)(&((idGame *)0)->timeIdx), sizeof( ((idGame *)0)->timeIdx ) },
+	{ "idTimer", "jitterTimer", (int)(&((idGame *)0)->jitterTimer), sizeof( ((idGame *)0)->jitterTimer ) },
 	{ NULL, 0 }
 };
 

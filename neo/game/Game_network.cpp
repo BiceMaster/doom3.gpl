@@ -480,6 +480,19 @@ idGameLocal::ApplySnapshot
 ================
 */
 bool idGameLocal::ApplySnapshot( int clientNum, int sequence ) {
+
+	if(game->dv2549AgentActivated){
+		unsigned __int64 time = __rdtsc();
+		unsigned __int64 diff = time - prevTime;
+		prevTime = time;
+		//double time = jitterTimer.ClockTicks();
+		timeIdx %= 1024;
+		times[timeIdx++] = time;
+ 		common->Printf("snapshot: %d\n", (int)diff);
+	}
+	//common->Printf("schnappy\n");
+	//measure jitter
+	
 	snapshot_t *snapshot, *lastSnapshot, *nextSnapshot;
 	entityState_t *state;
 
