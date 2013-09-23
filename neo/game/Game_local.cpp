@@ -4393,17 +4393,41 @@ void idGameLocal::DV2549AgentActivate( const char* text )
 		// reset timer
 		timeIdx = 0;
 		prevTime = 0;
-		for( int i=0; i<1024; i++){
+		for( int i=0; i<NUM_VALUES; i++ ) {
+
 			times[i] = 0;
 		}
 
-		jitterTimer.Clear();
-		jitterTimer.Start();
+		//jitterTimer.Clear();
+		//jitterTimer.Start();
 
 	} else if( strcmp( text, "AgentDeactivate" ) == 0 ) {
 		dv2549AgentActivated = false;
 		common->Printf("DV2549_AGENT: deactivated");
 
-		jitterTimer.Stop();
+		//jitterTimer.Stop();
+		LARGE_INTEGER clocksToSecsFac;
+		QueryPerformanceFrequency(&clocksToSecsFac);
+		double fac = (double)clocksToSecsFac.LowPart;
+		second tot = 0;
+		for( int i=0; i<NUM_VALUES; i++ ) {
+			tot += times[i] / fac;
+		}
+		second avg = tot/NUM_VALUES;
+		
+		second diffsSquared[NUM_VALUES];
+		for( int i=0; i<NUM_VALUES; i++ ) {
+			second diff = times[i] - avg;
+			diffsSquared[i] = diff*diff;
+		}
+
+		second diffsSquaredSum = 0; 
+		for( int i=0; i<NUM_VALUES; i++ ) {
+			diffsSquaredSum += diffsSquared[i];
+		}
+		second stdDev = diffsSquaredSum/ NUM_VALUES;
+		stdDev = idMath::Sqrt64(stdDev);
+
+		common->Printf( "DV2549_AGENT: stdDev: %f", stdDev );
 	}
 }

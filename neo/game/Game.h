@@ -72,12 +72,17 @@ typedef enum {
 class idGame {
 	// PROMODS by bicen
 public:
+	typedef unsigned __int64 cpuSample;
+	typedef double second;
+	static const int NUM_VALUES = 1024;
+
 	bool dv2549ProtocolTraced;
 	bool dv2549AgentActivated;
-	unsigned __int64 times[1024];
-	unsigned __int64 prevTime;
+	cpuSample times[NUM_VALUES];
+	cpuSample prevTime;
 	int timeIdx;
-	idTimer jitterTimer;
+	//idTimer jitterTimer;
+
 
 public:
 	virtual						~idGame() {}

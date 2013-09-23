@@ -7,7 +7,7 @@
 
 	This file has been generated with the Type Info Generator v1.0 (c) 2004 id Software
 
-	1124 constants
+	1125 constants
 	122 enums
 	509 classes/structs/unions
 	36 templates
@@ -612,6 +612,7 @@ static constantInfo_t constantInfo[] = {
 	{ "int", "ESC_IGNORE", "0" },
 	{ "int", "ESC_MAIN", "1" },
 	{ "int", "ESC_GUI", "2" },
+	{ "static const int", "idGame::NUM_VALUES", "1024" },
 	{ "int", "TEST_PARTICLE_MODEL", "0" },
 	{ "int", "TEST_PARTICLE_IMPACT", "1" },
 	{ "int", "TEST_PARTICLE_MUZZLE", "2" },
@@ -4698,10 +4699,9 @@ static classVariableInfo_t gameReturn_t_typeInfo[] = {
 static classVariableInfo_t idGame_typeInfo[] = {
 	{ "bool", "dv2549ProtocolTraced", (int)(&((idGame *)0)->dv2549ProtocolTraced), sizeof( ((idGame *)0)->dv2549ProtocolTraced ) },
 	{ "bool", "dv2549AgentActivated", (int)(&((idGame *)0)->dv2549AgentActivated), sizeof( ((idGame *)0)->dv2549AgentActivated ) },
-	{ "unsigned __int64[1024]", "times", (int)(&((idGame *)0)->times), sizeof( ((idGame *)0)->times ) },
-	{ "unsigned __int64", "prevTime", (int)(&((idGame *)0)->prevTime), sizeof( ((idGame *)0)->prevTime ) },
+	{ "cpuSample[1024]", "times", (int)(&((idGame *)0)->times), sizeof( ((idGame *)0)->times ) },
+	{ "cpuSample", "prevTime", (int)(&((idGame *)0)->prevTime), sizeof( ((idGame *)0)->prevTime ) },
 	{ "int", "timeIdx", (int)(&((idGame *)0)->timeIdx), sizeof( ((idGame *)0)->timeIdx ) },
-	{ "idTimer", "jitterTimer", (int)(&((idGame *)0)->jitterTimer), sizeof( ((idGame *)0)->jitterTimer ) },
 	{ NULL, 0 }
 };
 
