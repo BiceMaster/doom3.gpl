@@ -482,12 +482,12 @@ idGameLocal::ApplySnapshot
 bool idGameLocal::ApplySnapshot( int clientNum, int sequence ) {
 	// PROMODS by bicen
 	if( game->dv2549AgentActivated ) {
-		//cpuCycle time = __rdtsc();
-		cpuCycle time = this->time;
-		cpuCycle diff = time - m_prevTime;
-		m_prevTime = time;
-		m_sampleIdx %= VALUE_CNT;
-		m_samples[m_sampleIdx++] = diff;
+		//int time = __rdtsc();
+		int time = this->time;
+		int diff = time - m_jitterStats.m_prevTime;
+		m_jitterStats.m_prevTime = time;
+		m_jitterStats.m_sampleIdx %= VALUE_CNT;
+		m_jitterStats.add( diff );
 	}
 	// end of PROMODS by bicen
 

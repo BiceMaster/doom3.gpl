@@ -2327,7 +2327,7 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds ) {
 			ret.heartRate = player->heartRate;
 			ret.stamina = idMath::FtoiFast( player->stamina );
 			// combat is a 0-100 value based on lastHitTime and lastDmgTime
-			// each make up 50% of the time spread over 10 seconds
+			// each make up 50% of the time spread over 10 doubles
 			ret.combat = 0;
 			if ( player->lastDmgTime > 0 && time < player->lastDmgTime + 10000 ) {
 				ret.combat += 50.0f * (float) ( time - player->lastDmgTime ) / 10000;
@@ -4378,22 +4378,54 @@ void idGameLocal::GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] ) { }
 void idGameLocal::sendPing( const char* text )
 {
 	if ( strcmp( text, "Ping" ) == 0 ) {
-		pingMsg startTime = time;
 		if ( gameLocal.isClient ) {
-			idBitMsg  outMsg;
-			byte    msgBuf[PING_MSG_SIZE];
-			outMsg.Init( msgBuf, sizeof( msgBuf ) );
-			outMsg.WriteByte( GAME_RELIABLE_MESSAGE_BICEN_PING );
-			outMsg.WriteData( (void*)&startTime, sizeof(pingMsg));
-			networkSystem->ClientSendReliableMessage( outMsg );
-
-			common->Printf("Pinging server\n");
+			doTheBicenPing();
 		}
 	}
 }
 
-void idGameLocal::DV2549ProtocolTrace( const char* text )
+void idGameLocal::doTheBicenPing() {
+	idBitMsg outMsg;
+	byte msgBuf[PING_MSG_SIZE];
+	outMsg.Init( msgBuf, sizeof( msgBuf ) );
+	outMsg.WriteByte( GAME_RELIABLE_MESSAGE_BICEN_PING );
+	pingMsg startTime = time;
+	outMsg.WriteData( (void*)&startTime, sizeof(pingMsg));
+	networkSystem->ClientSendReliableMessage( outMsg );
+	//common->Printf("Pinging server\n");
+	m_pingCnt++;
+}
+
+void idGameLocal::handleBicenPing( const idBitMsg &msg )
 {
+	idBitMsg outMsg;
+	byte msgBuf[ PING_MSG_SIZE ];
+	pingMsg time;
+	msg.ReadData( (void*)&time, sizeof(pingMsg) );
+
+	outMsg.Init( msgBuf, sizeof( msgBuf ) );
+	outMsg.WriteByte( GAME_RELIABLE_MESSAGE_BICEN_PONG );
+	outMsg.WriteData( (void*)&time, sizeof(pingMsg));
+
+	networkSystem->ServerSendReliableMessage( -1, outMsg );
+	//common->Printf("Ping received: %i Server pong\n", time);
+}
+
+void idGameLocal::handleBicenPong( const idBitMsg &msg )
+{
+	pingMsg recTime;
+	msg.ReadData( (void*)&recTime, sizeof(pingMsg) );
+	int diffTime = time - recTime;
+
+	m_pingPongStats.add( diffTime );
+	m_pongCnt++;
+	if(dv2549AgentActivated) {
+		doTheBicenPing();
+	}
+	//common->Printf("Pong, recieved: %i, current: %i, diff %i\n", recTime, time, diffTime);
+}
+
+void idGameLocal::DV2549ProtocolTrace( const char* text ) {
 	if ( strcmp( text, "ProtocolTrace" ) == 0 ) {
 		dv2549ProtocolTraced = true;
 		common->Printf("DV2549_PROTOCOL: traced");
@@ -4403,68 +4435,38 @@ void idGameLocal::DV2549ProtocolTrace( const char* text )
 	}
 }
 
-void idGameLocal::DV2549AgentActivate( const char* text )
-{
+void idGameLocal::DV2549AgentActivate( const char* text ) {
 	if ( strcmp( text, "AgentActivate" ) == 0 || strcmp( text, "AA" ) == 0 ) {
 		dv2549AgentActivated = true;
 		common->Printf("DV2549_AGENT: activated");
-		resetTimer();
+		m_jitterStats.resetTimer();
+		m_pingCnt = 0;
+		m_pongCnt = 0;
+		doTheBicenPing();
 
 	} else if ( strcmp( text, "AgentDeactivate"  ) == 0 || strcmp( text, "AD" ) == 0 ) {
 		dv2549AgentActivated = false;
 		common->Printf("DV2549_AGENT: deactivated");
 
-		calcStdDev();
+		common->Printf("\nJitter stats");
+		m_jitterStats.calcStdDev();
+		m_jitterStats.avg();
 
+		common->Printf("\nDelay/roundtrip stats");
+		m_pingPongStats.calcStdDev();
+		m_pingPongStats.avg();
+		common->Printf("\n ping: %i, pong: %i, tot: %i",
+			m_pingCnt, m_pongCnt, m_pingCnt + m_pongCnt);
 	}
 }
 
-void idGameLocal::calcStdDev()
-{
-	second tot = 0;
-	second times[VALUE_CNT];
-	for ( int i=0; i<VALUE_CNT; i++ ) {
-		second conv = cyclesToSeconds(m_samples[i]);
-		times[i] = conv;
-		tot += conv;
-	}
-	second avg = tot/VALUE_CNT;
+// BicenStats
 
-	second diffsSquared[VALUE_CNT];
-	for ( int i=0; i<VALUE_CNT; i++ ) {
-		second diff = times[i] - avg;
-		diffsSquared[i] = diff*diff;
-	}
-
-	second diffsSquaredSum = 0; 
-	for ( int i=0; i<VALUE_CNT; i++ ) {
-		diffsSquaredSum += diffsSquared[i];
-	}
-	second stdDev = diffsSquaredSum/ VALUE_CNT;
-	stdDev = idMath::Sqrt64(stdDev);
-
-	//print
-	for ( int i=0; i<VALUE_CNT; i++ ) {
-		common->Printf( "%4.i: cycles: %8.4i, asSecs: %8.4f, diffs^2: %8.4f \n",
-			i, (int)m_samples[i], times[i], diffsSquared[i] );
-	}
-
-	common->Printf( "DV2549_AGENT: stdDev: %f", stdDev );
+BiceStats::BiceStats() {
 	resetTimer();
 }
 
-idGame::second idGameLocal::cyclesToSeconds( cpuCycle clocks )
-{
-	LARGE_INTEGER clocksToSecsFac;
-	QueryPerformanceFrequency(&clocksToSecsFac);
-	double fac = (double)clocksToSecsFac.LowPart;
-	fac = 3600000000; // clock speed on i7 2600k
-	fac = 1000.0; // millis to secs
-	return clocks / fac;
-}
-
-void idGameLocal::resetTimer()
-{
+void BiceStats::resetTimer() {
 	m_sampleIdx = 0;
 	m_prevTime = 0;
 	for( int i=0; i<VALUE_CNT; i++ ) {
@@ -4472,26 +4474,60 @@ void idGameLocal::resetTimer()
 	}
 }
 
-void idGameLocal::handleBicenPing( const idBitMsg &msg )
-{
-	idBitMsg  outMsg;
-	byte    msgBuf[ PING_MSG_SIZE ];
-	pingMsg time;
-	msg.ReadData( (void*)&time, sizeof(pingMsg) );
-
-	outMsg.Init( msgBuf, sizeof( msgBuf ) );
-	outMsg.WriteByte( GAME_RELIABLE_MESSAGE_BICEN_PONG );
-	outMsg.WriteData( (void*)&time, sizeof(pingMsg));
-
-	networkSystem->ServerSendReliableMessage( -1, outMsg );
-	common->Printf("Server pong\n");
+void BiceStats::add( int p_val ) {
+	m_samples[m_sampleIdx++] = p_val;
 }
 
-void idGameLocal::handleBicenPong( const idBitMsg &msg )
+void BiceStats::calcStdDev() {
+	double tot = 0;
+	double times[VALUE_CNT];
+	for ( int i=0; i<VALUE_CNT; i++ ) {
+		double conv = cyclesToSeconds(m_samples[i]);
+		times[i] = conv;
+		tot += conv;
+	}
+	double avg = tot/VALUE_CNT;
+
+	double diffsSquared[VALUE_CNT];
+	for ( int i=0; i<VALUE_CNT; i++ ) {
+		double diff = times[i] - avg;
+		diffsSquared[i] = diff*diff;
+	}
+
+	double diffsSquaredSum = 0; 
+	for ( int i=0; i<VALUE_CNT; i++ ) {
+		diffsSquaredSum += diffsSquared[i];
+	}
+	double stdDev = diffsSquaredSum/ VALUE_CNT;
+	stdDev = idMath::Sqrt64(stdDev);
+
+	//print
+	for ( int i=0; i<VALUE_CNT; i++ ) {
+		//common->Printf( "%4.i: cycles: %8.4i, asSecs: %8.4f, diffs^2: %8.4f \n",
+		//	i, (int)m_samples[i], times[i], diffsSquared[i] );
+	}
+
+	common->Printf( "\n stdDev: %f", stdDev );
+} 
+
+void BiceStats::avg() {
+	double tot = 0;
+	for ( int i=0; i<VALUE_CNT; i++ ) {
+		double conv = cyclesToSeconds(m_samples[i]);
+		tot += conv;
+	}
+	double avg = tot/VALUE_CNT;
+	common->Printf( "\n tot: %f, avg: %f", tot, avg );
+}
+
+double BiceStats::cyclesToSeconds( int clocks )
 {
-	pingMsg recievedTime;
-	msg.ReadData((void*)&time,sizeof(pingMsg));
-	common->Printf("Client Received Value: %i\n", time - recievedTime);
+	LARGE_INTEGER clocksToSecsFac;
+	QueryPerformanceFrequency(&clocksToSecsFac);
+	double fac = (double)clocksToSecsFac.LowPart;
+	fac = 3600000000; // clock speed on i7 2600k
+	fac = 1000.0; // millis to secs
+	return clocks / fac;
 }
 
 // end of PROMODS by bicen

@@ -254,9 +254,10 @@ public:
 	void DV2549AgentActivate( const char* text );
 
 	void calcStdDev();
-	second cyclesToSeconds( cpuCycle clocks);
+	double cyclesToSeconds( int clocks);
 	void resetTimer();
 
+	void doTheBicenPing();
 	void handleBicenPing( const idBitMsg &msg );
 	void handleBicenPong( const idBitMsg &msg );
 	// end of PROMODS by bicen

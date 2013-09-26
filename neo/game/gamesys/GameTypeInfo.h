@@ -7,9 +7,9 @@
 
 	This file has been generated with the Type Info Generator v1.0 (c) 2004 id Software
 
-	1128 constants
+	1129 constants
 	122 enums
-	509 classes/structs/unions
+	510 classes/structs/unions
 	36 templates
 	6 max inheritance level for 'idPlayer'
 
@@ -612,6 +612,7 @@ static constantInfo_t constantInfo[] = {
 	{ "int", "ESC_IGNORE", "0" },
 	{ "int", "ESC_MAIN", "1" },
 	{ "int", "ESC_GUI", "2" },
+	{ "static const int", "BiceStats::VALUE_CNT", "1024" },
 	{ "static const int", "idGame::VALUE_CNT", "1024" },
 	{ "static const int", "idGame::PING_MSG_SIZE", "128" },
 	{ "int", "TEST_PARTICLE_MODEL", "0" },
@@ -4701,12 +4702,20 @@ static classVariableInfo_t gameReturn_t_typeInfo[] = {
 	{ NULL, 0 }
 };
 
+static classVariableInfo_t BiceStats_typeInfo[] = {
+	{ "int", "m_sampleIdx", (int)(&((BiceStats *)0)->m_sampleIdx), sizeof( ((BiceStats *)0)->m_sampleIdx ) },
+	{ "int[1024]", "m_samples", (int)(&((BiceStats *)0)->m_samples), sizeof( ((BiceStats *)0)->m_samples ) },
+	{ "int", "m_prevTime", (int)(&((BiceStats *)0)->m_prevTime), sizeof( ((BiceStats *)0)->m_prevTime ) },
+	{ NULL, 0 }
+};
+
 static classVariableInfo_t idGame_typeInfo[] = {
+	{ "BiceStats", "m_jitterStats", (int)(&((idGame *)0)->m_jitterStats), sizeof( ((idGame *)0)->m_jitterStats ) },
+	{ "BiceStats", "m_pingPongStats", (int)(&((idGame *)0)->m_pingPongStats), sizeof( ((idGame *)0)->m_pingPongStats ) },
 	{ "bool", "dv2549ProtocolTraced", (int)(&((idGame *)0)->dv2549ProtocolTraced), sizeof( ((idGame *)0)->dv2549ProtocolTraced ) },
 	{ "bool", "dv2549AgentActivated", (int)(&((idGame *)0)->dv2549AgentActivated), sizeof( ((idGame *)0)->dv2549AgentActivated ) },
-	{ "cpuCycle[1024]", "m_samples", (int)(&((idGame *)0)->m_samples), sizeof( ((idGame *)0)->m_samples ) },
-	{ "cpuCycle", "m_prevTime", (int)(&((idGame *)0)->m_prevTime), sizeof( ((idGame *)0)->m_prevTime ) },
-	{ "int", "m_sampleIdx", (int)(&((idGame *)0)->m_sampleIdx), sizeof( ((idGame *)0)->m_sampleIdx ) },
+	{ "int", "m_pongCnt", (int)(&((idGame *)0)->m_pongCnt), sizeof( ((idGame *)0)->m_pongCnt ) },
+	{ "int", "m_pingCnt", (int)(&((idGame *)0)->m_pingCnt), sizeof( ((idGame *)0)->m_pingCnt ) },
 	{ NULL, 0 }
 };
 
@@ -4980,11 +4989,11 @@ static classVariableInfo_t frameLookup_t_typeInfo[] = {
 	{ NULL, 0 }
 };
 
-static classVariableInfo_t class_254_class_254_typeInfo[] = {
-//	{ "const idSoundShader *", "soundShader", (int)(&((class_254::class_254 *)0)->soundShader), sizeof( ((class_254::class_254 *)0)->soundShader ) },
-//	{ "const function_t *", "function", (int)(&((class_254::class_254 *)0)->function), sizeof( ((class_254::class_254 *)0)->function ) },
-//	{ "const idDeclSkin *", "skin", (int)(&((class_254::class_254 *)0)->skin), sizeof( ((class_254::class_254 *)0)->skin ) },
-//	{ "int", "index", (int)(&((class_254::class_254 *)0)->index), sizeof( ((class_254::class_254 *)0)->index ) },
+static classVariableInfo_t class_255_class_255_typeInfo[] = {
+//	{ "const idSoundShader *", "soundShader", (int)(&((class_255::class_255 *)0)->soundShader), sizeof( ((class_255::class_255 *)0)->soundShader ) },
+//	{ "const function_t *", "function", (int)(&((class_255::class_255 *)0)->function), sizeof( ((class_255::class_255 *)0)->function ) },
+//	{ "const idDeclSkin *", "skin", (int)(&((class_255::class_255 *)0)->skin), sizeof( ((class_255::class_255 *)0)->skin ) },
+//	{ "int", "index", (int)(&((class_255::class_255 *)0)->index), sizeof( ((class_255::class_255 *)0)->index ) },
 	{ NULL, 0 }
 };
 
@@ -8142,6 +8151,7 @@ static classTypeInfo_t classTypeInfo[] = {
 	{ "idAASFile", "", sizeof(idAASFile), idAASFile_typeInfo },
 	{ "idAASFileManager", "", sizeof(idAASFileManager), idAASFileManager_typeInfo },
 	{ "gameReturn_t", "", sizeof(gameReturn_t), gameReturn_t_typeInfo },
+	{ "BiceStats", "", sizeof(BiceStats), BiceStats_typeInfo },
 	{ "idGame", "", sizeof(idGame), idGame_typeInfo },
 	{ "refSound_t", "", sizeof(refSound_t), refSound_t_typeInfo },
 	{ "idGameEdit", "", sizeof(idGameEdit), idGameEdit_typeInfo },
@@ -8172,7 +8182,7 @@ static classTypeInfo_t classTypeInfo[] = {
 	{ "jointInfo_t", "", sizeof(jointInfo_t), jointInfo_t_typeInfo },
 	{ "jointMod_t", "", sizeof(jointMod_t), jointMod_t_typeInfo },
 	{ "frameLookup_t", "", sizeof(frameLookup_t), frameLookup_t_typeInfo },
-//	{ "class_254::class_254", "", sizeof(class_254::class_254), class_254_class_254_typeInfo },
+//	{ "class_255::class_255", "", sizeof(class_255::class_255), class_255_class_255_typeInfo },
 	{ "frameCommand_t", "", sizeof(frameCommand_t), frameCommand_t_typeInfo },
 	{ "animFlags_t", "", sizeof(animFlags_t), animFlags_t_typeInfo },
 	{ "idModelExport", "", sizeof(idModelExport), idModelExport_typeInfo },

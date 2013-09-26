@@ -69,23 +69,37 @@ typedef enum {
 #define TIME_GROUP1		0
 #define TIME_GROUP2		1
 
+struct BiceStats {
+	static const int VALUE_CNT = 1024;
+
+	int m_sampleIdx;
+	int m_samples[VALUE_CNT];
+	int m_prevTime;
+
+	BiceStats();
+	void resetTimer();
+	void add( int p_val );
+	void calcStdDev();
+	void avg();
+
+	double cyclesToSeconds( int clocks );
+};
+
 class idGame {
 	// PROMODS by bicen
 public:
-	//typedef unsigned __int64 cpuCycle;
-	typedef int cpuCycle;
-	typedef double second;
+	//typedef double second;
 	typedef int pingMsg;
 	static const int VALUE_CNT = 1024;
 	static const int PING_MSG_SIZE = 128;
 
+	BiceStats m_jitterStats;
+	BiceStats m_pingPongStats;
+
 	bool dv2549ProtocolTraced;
 	bool dv2549AgentActivated;
-	cpuCycle m_samples[VALUE_CNT];
-	cpuCycle m_prevTime;
-	int m_sampleIdx;
-	//idTimer jitterTimer;
-
+	int m_pongCnt;
+	int m_pingCnt;
 
 public:
 	virtual						~idGame() {}
