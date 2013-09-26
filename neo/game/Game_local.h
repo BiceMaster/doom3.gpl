@@ -169,7 +169,11 @@ enum {
 	GAME_RELIABLE_MESSAGE_STARTSTATE,
 	GAME_RELIABLE_MESSAGE_MENU,
 	GAME_RELIABLE_MESSAGE_WARMUPTIME,
-	GAME_RELIABLE_MESSAGE_EVENT
+	GAME_RELIABLE_MESSAGE_EVENT,
+	// PROMODS by bicen
+	GAME_RELIABLE_MESSAGE_BICEN_PING,
+	GAME_RELIABLE_MESSAGE_BICEN_PONG,
+	// end of PROMODS by bicen
 };
 
 typedef enum {
@@ -243,12 +247,19 @@ private:
 //============================================================================
 
 class idGameLocal : public idGame {
-		// PROMODS by bicen
+	// PROMODS by bicen
 public:
+	void sendPing( const char* text );
 	void DV2549ProtocolTrace( const char* text );
 	void DV2549AgentActivate( const char* text );
-	//std::vector<double> snapShotTimes;
-	
+
+	void calcStdDev();
+	second cyclesToSeconds( cpuCycle clocks);
+	void resetTimer();
+
+	void handleBicenPing( const idBitMsg &msg );
+	void handleBicenPong( const idBitMsg &msg );
+	// end of PROMODS by bicen
 
 public:
 	idDict					serverInfo;				// all the tunable parameters, like numclients, etc
@@ -291,7 +302,7 @@ public:
 	idSmokeParticles *		smokeParticles;			// global smoke trails
 	idEditEntities *		editEntities;			// in game editing
 
-	int						cinematicSkipTime;		// don't allow skipping cinemetics until this time has passed so player doesn't skip out accidently from a firefight
+	int						cinematicSkipTime;		// don't allow skipping cinemetics until this time has passed so player doesn't skip out accidentally from a firefight
 	int						cinematicStopTime;		// cinematics have several camera changes, so keep track of when we stop them so that we don't reset cinematicSkipTime unnecessarily
 	int						cinematicMaxSkipTime;	// time to end cinematic when skipping.  there's a possibility of an infinite loop if the map isn't set up right.
 	bool					inCinematic;			// game is playing cinematic (player controls frozen)
@@ -357,9 +368,13 @@ public:
 	virtual void			ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &msg, byte *clientInPVS, int numPVSClients );
 	virtual bool			ServerApplySnapshot( int clientNum, int sequence );
 	virtual void			ServerProcessReliableMessage( int clientNum, const idBitMsg &msg );
+
+
 	virtual void			ClientReadSnapshot( int clientNum, int sequence, const int gameFrame, const int gameTime, const int dupeUsercmds, const int aheadOfServer, const idBitMsg &msg );
 	virtual bool			ClientApplySnapshot( int clientNum, int sequence );
 	virtual void			ClientProcessReliableMessage( int clientNum, const idBitMsg &msg );
+
+
 	virtual gameReturn_t	ClientPrediction( int clientNum, const usercmd_t *clientCmds, bool lastPredictFrame );
 
 	virtual void			GetClientStats( int clientNum, char *data, const int len );

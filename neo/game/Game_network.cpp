@@ -480,19 +480,17 @@ idGameLocal::ApplySnapshot
 ================
 */
 bool idGameLocal::ApplySnapshot( int clientNum, int sequence ) {
-
-	if(game->dv2549AgentActivated){
-		cpuSample time = __rdtsc();
-		cpuSample diff = time - prevTime;
-		prevTime = time;
-		//double time = jitterTimer.ClockTicks();
-		timeIdx %= NUM_VALUES;
-		times[timeIdx++] = time;
- 		//common->Printf("snapshot: %d\n", (int)diff);
+	// PROMODS by bicen
+	if( game->dv2549AgentActivated ) {
+		//cpuCycle time = __rdtsc();
+		cpuCycle time = this->time;
+		cpuCycle diff = time - m_prevTime;
+		m_prevTime = time;
+		m_sampleIdx %= VALUE_CNT;
+		m_samples[m_sampleIdx++] = diff;
 	}
-	//common->Printf("schnappy\n");
-	//measure jitter
-	
+	// end of PROMODS by bicen
+
 	snapshot_t *snapshot, *lastSnapshot, *nextSnapshot;
 	entityState_t *state;
 
@@ -864,10 +862,18 @@ void idGameLocal::ServerProcessReliableMessage( int clientNum, const idBitMsg &m
 			}
 			break;
 		}
+		// PROMODS by bicen
+		case GAME_RELIABLE_MESSAGE_BICEN_PING: {
+			handleBicenPing( msg );
+			break;
+		}
+
 		default: {
 			Warning( "Unknown client->server reliable message: %d", id );
 			break;
 		}
+		 // end of PROMODS by bicen
+
 	}
 }
 
@@ -1389,6 +1395,7 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 			mpGame.AddChatLine( "%s^0: %s\n", name, text );
 			DV2549AgentActivate(text);
 			DV2549ProtocolTrace(text);
+			sendPing(text);
 			break;
 		}
 		case GAME_RELIABLE_MESSAGE_SOUND_EVENT: {
@@ -1536,6 +1543,11 @@ void idGameLocal::ClientProcessReliableMessage( int clientNum, const idBitMsg &m
 			}
 
 			mpGame.ClientReadWarmupTime( msg );
+			break;
+		}
+		case GAME_RELIABLE_MESSAGE_BICEN_PONG: {
+			handleBicenPong(msg);
+
 			break;
 		}
 		default: {

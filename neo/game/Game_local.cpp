@@ -4373,12 +4373,31 @@ idGameLocal::GetMapLoadingGUI
 */
 void idGameLocal::GetMapLoadingGUI( char gui[ MAX_STRING_CHARS ] ) { }
 
+// PROMODS by bicen
+
+void idGameLocal::sendPing( const char* text )
+{
+	if ( strcmp( text, "Ping" ) == 0 ) {
+		pingMsg startTime = time;
+		if ( gameLocal.isClient ) {
+			idBitMsg  outMsg;
+			byte    msgBuf[PING_MSG_SIZE];
+			outMsg.Init( msgBuf, sizeof( msgBuf ) );
+			outMsg.WriteByte( GAME_RELIABLE_MESSAGE_BICEN_PING );
+			outMsg.WriteData( (void*)&startTime, sizeof(pingMsg));
+			networkSystem->ClientSendReliableMessage( outMsg );
+
+			common->Printf("Pinging server\n");
+		}
+	}
+}
+
 void idGameLocal::DV2549ProtocolTrace( const char* text )
 {
-	if( strcmp( text, "ProtocolTrace" ) == 0 ) {
+	if ( strcmp( text, "ProtocolTrace" ) == 0 ) {
 		dv2549ProtocolTraced = true;
 		common->Printf("DV2549_PROTOCOL: traced");
-	} else if( strcmp( text, "ProtocolHide" ) == 0 ) {
+	} else if ( strcmp( text, "ProtocolHide" ) == 0 ) {
 		dv2549ProtocolTraced = false;
 		common->Printf("DV2549_PROTOCOL: hidden");
 	}
@@ -4386,48 +4405,93 @@ void idGameLocal::DV2549ProtocolTrace( const char* text )
 
 void idGameLocal::DV2549AgentActivate( const char* text )
 {
-	if( strcmp( text, "AgentActivate" ) == 0 ) {
+	if ( strcmp( text, "AgentActivate" ) == 0 || strcmp( text, "AA" ) == 0 ) {
 		dv2549AgentActivated = true;
 		common->Printf("DV2549_AGENT: activated");
+		resetTimer();
 
-		// reset timer
-		timeIdx = 0;
-		prevTime = 0;
-		for( int i=0; i<NUM_VALUES; i++ ) {
-
-			times[i] = 0;
-		}
-
-		//jitterTimer.Clear();
-		//jitterTimer.Start();
-
-	} else if( strcmp( text, "AgentDeactivate" ) == 0 ) {
+	} else if ( strcmp( text, "AgentDeactivate"  ) == 0 || strcmp( text, "AD" ) == 0 ) {
 		dv2549AgentActivated = false;
 		common->Printf("DV2549_AGENT: deactivated");
 
-		//jitterTimer.Stop();
-		LARGE_INTEGER clocksToSecsFac;
-		QueryPerformanceFrequency(&clocksToSecsFac);
-		double fac = (double)clocksToSecsFac.LowPart;
-		second tot = 0;
-		for( int i=0; i<NUM_VALUES; i++ ) {
-			tot += times[i] / fac;
-		}
-		second avg = tot/NUM_VALUES;
-		
-		second diffsSquared[NUM_VALUES];
-		for( int i=0; i<NUM_VALUES; i++ ) {
-			second diff = times[i] - avg;
-			diffsSquared[i] = diff*diff;
-		}
+		calcStdDev();
 
-		second diffsSquaredSum = 0; 
-		for( int i=0; i<NUM_VALUES; i++ ) {
-			diffsSquaredSum += diffsSquared[i];
-		}
-		second stdDev = diffsSquaredSum/ NUM_VALUES;
-		stdDev = idMath::Sqrt64(stdDev);
-
-		common->Printf( "DV2549_AGENT: stdDev: %f", stdDev );
 	}
 }
+
+void idGameLocal::calcStdDev()
+{
+	second tot = 0;
+	second times[VALUE_CNT];
+	for ( int i=0; i<VALUE_CNT; i++ ) {
+		second conv = cyclesToSeconds(m_samples[i]);
+		times[i] = conv;
+		tot += conv;
+	}
+	second avg = tot/VALUE_CNT;
+
+	second diffsSquared[VALUE_CNT];
+	for ( int i=0; i<VALUE_CNT; i++ ) {
+		second diff = times[i] - avg;
+		diffsSquared[i] = diff*diff;
+	}
+
+	second diffsSquaredSum = 0; 
+	for ( int i=0; i<VALUE_CNT; i++ ) {
+		diffsSquaredSum += diffsSquared[i];
+	}
+	second stdDev = diffsSquaredSum/ VALUE_CNT;
+	stdDev = idMath::Sqrt64(stdDev);
+
+	//print
+	for ( int i=0; i<VALUE_CNT; i++ ) {
+		common->Printf( "%4.i: cycles: %8.4i, asSecs: %8.4f, diffs^2: %8.4f \n",
+			i, (int)m_samples[i], times[i], diffsSquared[i] );
+	}
+
+	common->Printf( "DV2549_AGENT: stdDev: %f", stdDev );
+	resetTimer();
+}
+
+idGame::second idGameLocal::cyclesToSeconds( cpuCycle clocks )
+{
+	LARGE_INTEGER clocksToSecsFac;
+	QueryPerformanceFrequency(&clocksToSecsFac);
+	double fac = (double)clocksToSecsFac.LowPart;
+	fac = 3600000000; // clock speed on i7 2600k
+	fac = 1000.0; // millis to secs
+	return clocks / fac;
+}
+
+void idGameLocal::resetTimer()
+{
+	m_sampleIdx = 0;
+	m_prevTime = 0;
+	for( int i=0; i<VALUE_CNT; i++ ) {
+		m_samples[i] = 0;
+	}
+}
+
+void idGameLocal::handleBicenPing( const idBitMsg &msg )
+{
+	idBitMsg  outMsg;
+	byte    msgBuf[ PING_MSG_SIZE ];
+	pingMsg time;
+	msg.ReadData( (void*)&time, sizeof(pingMsg) );
+
+	outMsg.Init( msgBuf, sizeof( msgBuf ) );
+	outMsg.WriteByte( GAME_RELIABLE_MESSAGE_BICEN_PONG );
+	outMsg.WriteData( (void*)&time, sizeof(pingMsg));
+
+	networkSystem->ServerSendReliableMessage( -1, outMsg );
+	common->Printf("Server pong\n");
+}
+
+void idGameLocal::handleBicenPong( const idBitMsg &msg )
+{
+	pingMsg recievedTime;
+	msg.ReadData((void*)&time,sizeof(pingMsg));
+	common->Printf("Client Received Value: %i\n", time - recievedTime);
+}
+
+// end of PROMODS by bicen

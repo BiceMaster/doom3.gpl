@@ -72,15 +72,18 @@ typedef enum {
 class idGame {
 	// PROMODS by bicen
 public:
-	typedef unsigned __int64 cpuSample;
+	//typedef unsigned __int64 cpuCycle;
+	typedef int cpuCycle;
 	typedef double second;
-	static const int NUM_VALUES = 1024;
+	typedef int pingMsg;
+	static const int VALUE_CNT = 1024;
+	static const int PING_MSG_SIZE = 128;
 
 	bool dv2549ProtocolTraced;
 	bool dv2549AgentActivated;
-	cpuSample times[NUM_VALUES];
-	cpuSample prevTime;
-	int timeIdx;
+	cpuCycle m_samples[VALUE_CNT];
+	cpuCycle m_prevTime;
+	int m_sampleIdx;
 	//idTimer jitterTimer;
 
 

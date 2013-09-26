@@ -7,7 +7,7 @@
 
 	This file has been generated with the Type Info Generator v1.0 (c) 2004 id Software
 
-	1125 constants
+	1128 constants
 	122 enums
 	509 classes/structs/unions
 	36 templates
@@ -612,7 +612,8 @@ static constantInfo_t constantInfo[] = {
 	{ "int", "ESC_IGNORE", "0" },
 	{ "int", "ESC_MAIN", "1" },
 	{ "int", "ESC_GUI", "2" },
-	{ "static const int", "idGame::NUM_VALUES", "1024" },
+	{ "static const int", "idGame::VALUE_CNT", "1024" },
+	{ "static const int", "idGame::PING_MSG_SIZE", "128" },
 	{ "int", "TEST_PARTICLE_MODEL", "0" },
 	{ "int", "TEST_PARTICLE_IMPACT", "1" },
 	{ "int", "TEST_PARTICLE_MUZZLE", "2" },
@@ -800,6 +801,8 @@ static constantInfo_t constantInfo[] = {
 	{ "int", "GAME_RELIABLE_MESSAGE_MENU", "22" },
 	{ "int", "GAME_RELIABLE_MESSAGE_WARMUPTIME", "23" },
 	{ "int", "GAME_RELIABLE_MESSAGE_EVENT", "24" },
+	{ "int", "GAME_RELIABLE_MESSAGE_BICEN_PING", "25" },
+	{ "int", "GAME_RELIABLE_MESSAGE_BICEN_PONG", "26" },
 	{ "int", "GAMESTATE_UNINITIALIZED", "0" },
 	{ "int", "GAMESTATE_NOMAP", "1" },
 	{ "int", "GAMESTATE_STARTUP", "2" },
@@ -2092,6 +2095,8 @@ static enumValueInfo_t enum_81_typeInfo[] = {
 	{ "GAME_RELIABLE_MESSAGE_MENU", 22 },
 	{ "GAME_RELIABLE_MESSAGE_WARMUPTIME", 23 },
 	{ "GAME_RELIABLE_MESSAGE_EVENT", 24 },
+	{ "GAME_RELIABLE_MESSAGE_BICEN_PING", 25 },
+	{ "GAME_RELIABLE_MESSAGE_BICEN_PONG", 26 },
 	{ NULL, 0 }
 };
 
@@ -4699,9 +4704,9 @@ static classVariableInfo_t gameReturn_t_typeInfo[] = {
 static classVariableInfo_t idGame_typeInfo[] = {
 	{ "bool", "dv2549ProtocolTraced", (int)(&((idGame *)0)->dv2549ProtocolTraced), sizeof( ((idGame *)0)->dv2549ProtocolTraced ) },
 	{ "bool", "dv2549AgentActivated", (int)(&((idGame *)0)->dv2549AgentActivated), sizeof( ((idGame *)0)->dv2549AgentActivated ) },
-	{ "cpuSample[1024]", "times", (int)(&((idGame *)0)->times), sizeof( ((idGame *)0)->times ) },
-	{ "cpuSample", "prevTime", (int)(&((idGame *)0)->prevTime), sizeof( ((idGame *)0)->prevTime ) },
-	{ "int", "timeIdx", (int)(&((idGame *)0)->timeIdx), sizeof( ((idGame *)0)->timeIdx ) },
+	{ "cpuCycle[1024]", "m_samples", (int)(&((idGame *)0)->m_samples), sizeof( ((idGame *)0)->m_samples ) },
+	{ "cpuCycle", "m_prevTime", (int)(&((idGame *)0)->m_prevTime), sizeof( ((idGame *)0)->m_prevTime ) },
+	{ "int", "m_sampleIdx", (int)(&((idGame *)0)->m_sampleIdx), sizeof( ((idGame *)0)->m_sampleIdx ) },
 	{ NULL, 0 }
 };
 
