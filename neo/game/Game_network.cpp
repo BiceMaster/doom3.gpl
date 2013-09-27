@@ -484,9 +484,8 @@ bool idGameLocal::ApplySnapshot( int clientNum, int sequence ) {
 	if( game->dv2549AgentActivated ) {
 		//int time = __rdtsc();
 		int time = this->time;
-		int diff = time - m_jitterStats.m_prevTime;
-		m_jitterStats.m_prevTime = time;
-		m_jitterStats.m_sampleIdx %= VALUE_CNT;
+		int diff = time - m_jitterStats.m_prevSample;
+		m_jitterStats.m_prevSample = time;
 		m_jitterStats.add( diff );
 	}
 	// end of PROMODS by bicen

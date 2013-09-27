@@ -72,15 +72,19 @@ typedef enum {
 struct BiceStats {
 	static const int VALUE_CNT = 1024;
 
+	int m_adds;
 	int m_sampleIdx;
+	int m_prevSample;
 	int m_samples[VALUE_CNT];
-	int m_prevTime;
 
 	BiceStats();
+	BiceStats& operator=( const BiceStats p_other );
 	void resetTimer();
 	void add( int p_val );
-	void calcStdDev();
-	void avg();
+	double calcStdDev();
+	double avg();
+	double median();
+	//int compareInt( const void * a, const void * b );
 
 	double cyclesToSeconds( int clocks );
 };

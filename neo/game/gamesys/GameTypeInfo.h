@@ -4703,9 +4703,10 @@ static classVariableInfo_t gameReturn_t_typeInfo[] = {
 };
 
 static classVariableInfo_t BiceStats_typeInfo[] = {
+	{ "int", "m_adds", (int)(&((BiceStats *)0)->m_adds), sizeof( ((BiceStats *)0)->m_adds ) },
 	{ "int", "m_sampleIdx", (int)(&((BiceStats *)0)->m_sampleIdx), sizeof( ((BiceStats *)0)->m_sampleIdx ) },
+	{ "int", "m_prevSample", (int)(&((BiceStats *)0)->m_prevSample), sizeof( ((BiceStats *)0)->m_prevSample ) },
 	{ "int[1024]", "m_samples", (int)(&((BiceStats *)0)->m_samples), sizeof( ((BiceStats *)0)->m_samples ) },
-	{ "int", "m_prevTime", (int)(&((BiceStats *)0)->m_prevTime), sizeof( ((BiceStats *)0)->m_prevTime ) },
 	{ NULL, 0 }
 };
 

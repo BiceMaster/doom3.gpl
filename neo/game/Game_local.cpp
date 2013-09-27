@@ -4426,10 +4426,10 @@ void idGameLocal::handleBicenPong( const idBitMsg &msg )
 }
 
 void idGameLocal::DV2549ProtocolTrace( const char* text ) {
-	if ( strcmp( text, "ProtocolTrace" ) == 0 ) {
+	if ( strcmp( text, "ProtocolTrace" ) == 0 || strcmp( text, "PT" ) == 0 ) {
 		dv2549ProtocolTraced = true;
 		common->Printf("DV2549_PROTOCOL: traced");
-	} else if ( strcmp( text, "ProtocolHide" ) == 0 ) {
+	} else if ( strcmp( text, "ProtocolHide" ) == 0 || strcmp( text, "PH" ) == 0 ) {
 		dv2549ProtocolTraced = false;
 		common->Printf("DV2549_PROTOCOL: hidden");
 	}
@@ -4440,6 +4440,7 @@ void idGameLocal::DV2549AgentActivate( const char* text ) {
 		dv2549AgentActivated = true;
 		common->Printf("DV2549_AGENT: activated");
 		m_jitterStats.resetTimer();
+		m_pingPongStats.resetTimer();
 		m_pingCnt = 0;
 		m_pongCnt = 0;
 		doTheBicenPing();
@@ -4448,14 +4449,29 @@ void idGameLocal::DV2549AgentActivate( const char* text ) {
 		dv2549AgentActivated = false;
 		common->Printf("DV2549_AGENT: deactivated");
 
-		common->Printf("\nJitter stats");
+		common->Printf( "\n\nJitter stats. Sample count: %i",
+			m_jitterStats.m_adds );
 		m_jitterStats.calcStdDev();
 		m_jitterStats.avg();
+		m_jitterStats.median();
 
-		common->Printf("\nDelay/roundtrip stats");
+		common->Printf( "\n\nRoundtrip stats. Sample count: %i",
+			m_pingPongStats.m_adds );
 		m_pingPongStats.calcStdDev();
 		m_pingPongStats.avg();
-		common->Printf("\n ping: %i, pong: %i, tot: %i",
+		m_jitterStats.median();
+
+		BiceStats delay = m_pingPongStats;
+		for ( int i=0; i<BiceStats::VALUE_CNT; i++ ) {
+			delay.m_samples[i] /= 2;
+		}
+		common->Printf( "\n\nDelay stats. Sample count: %i",
+			delay.m_adds );
+		delay.calcStdDev();
+		delay.avg();
+		delay.median();
+
+		common->Printf("\n\nPacket stats:\n Pings: %i\n Pongs: %i\n Total packets: %i",
 			m_pingCnt, m_pongCnt, m_pingCnt + m_pongCnt);
 	}
 }
@@ -4466,19 +4482,35 @@ BiceStats::BiceStats() {
 	resetTimer();
 }
 
+// Not safe in any way
+BiceStats& BiceStats::operator=( const BiceStats p_other ) {
+	m_adds = p_other.m_adds;
+	m_sampleIdx = p_other.m_sampleIdx;
+	m_prevSample = p_other.m_prevSample;
+
+	for ( int i=0; i<VALUE_CNT; i++ ) {
+		m_samples[i] = p_other.m_samples[i];
+	}
+
+	return *this;
+}
+
 void BiceStats::resetTimer() {
 	m_sampleIdx = 0;
-	m_prevTime = 0;
+	m_prevSample = 0;
+	m_adds = 0;
 	for( int i=0; i<VALUE_CNT; i++ ) {
 		m_samples[i] = 0;
 	}
 }
 
 void BiceStats::add( int p_val ) {
+	m_sampleIdx %= VALUE_CNT;
 	m_samples[m_sampleIdx++] = p_val;
+	m_adds = min(m_adds++, VALUE_CNT);
 }
 
-void BiceStats::calcStdDev() {
+double BiceStats::calcStdDev() {
 	double tot = 0;
 	double times[VALUE_CNT];
 	for ( int i=0; i<VALUE_CNT; i++ ) {
@@ -4486,7 +4518,7 @@ void BiceStats::calcStdDev() {
 		times[i] = conv;
 		tot += conv;
 	}
-	double avg = tot/VALUE_CNT;
+	double avg = tot/m_adds;
 
 	double diffsSquared[VALUE_CNT];
 	for ( int i=0; i<VALUE_CNT; i++ ) {
@@ -4498,27 +4530,53 @@ void BiceStats::calcStdDev() {
 	for ( int i=0; i<VALUE_CNT; i++ ) {
 		diffsSquaredSum += diffsSquared[i];
 	}
-	double stdDev = diffsSquaredSum/ VALUE_CNT;
+	double stdDev = diffsSquaredSum/ m_adds;
 	stdDev = idMath::Sqrt64(stdDev);
 
 	//print
-	for ( int i=0; i<VALUE_CNT; i++ ) {
+	for ( int i=0; i<m_adds; i++ ) {
 		//common->Printf( "%4.i: cycles: %8.4i, asSecs: %8.4f, diffs^2: %8.4f \n",
 		//	i, (int)m_samples[i], times[i], diffsSquared[i] );
 	}
 
 	common->Printf( "\n stdDev: %f", stdDev );
+	return stdDev;
 } 
 
-void BiceStats::avg() {
+double BiceStats::avg() {
 	double tot = 0;
-	for ( int i=0; i<VALUE_CNT; i++ ) {
+	for ( int i=0; i<m_adds; i++ ) {
 		double conv = cyclesToSeconds(m_samples[i]);
 		tot += conv;
 	}
-	double avg = tot/VALUE_CNT;
-	common->Printf( "\n tot: %f, avg: %f", tot, avg );
+	double avg = tot/m_adds;
+	common->Printf( "\n avg: %f", avg );
+	return avg;
 }
+
+int compareInt( const void * a, const void * b )
+{
+	if ( *(int*)a <  *(int*)b ) return -1;
+	if ( *(int*)a == *(int*)b ) return 0;
+	if ( *(int*)a >  *(int*)b ) return 1;
+}
+double BiceStats::median()
+{
+	int tmp[VALUE_CNT];
+	for ( int i=0; i<VALUE_CNT; i++ ) {
+		tmp[i] = m_samples[i];
+	}
+	qsort(&tmp[0], VALUE_CNT, sizeof(int), compareInt);
+
+	int zeroCnt = VALUE_CNT-m_adds;
+	int medianIdx = zeroCnt + m_adds/2;
+
+	int medianAsInt = tmp[medianIdx];
+	double medianAsDouble = cyclesToSeconds(medianAsInt);
+	common->Printf( "\n median: %f", medianAsDouble );
+	return medianAsDouble;
+}
+
 
 double BiceStats::cyclesToSeconds( int clocks )
 {
